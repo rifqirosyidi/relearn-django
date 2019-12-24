@@ -8,5 +8,7 @@ urlpatterns = [
     path('', views.homepage, name='homepage'),
     path('register/', views.register, name='register'),
     path('logout/', views.logout_account, name='logout'),
-    path('login/', views.login_account, name='login')
+    path('login/', views.login_account, name='login'),
+
+    path('<single_url>/', views.singe_slug, name='single_slug'),
 ]

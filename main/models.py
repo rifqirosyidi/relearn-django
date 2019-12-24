@@ -32,7 +32,7 @@ class TutorialSeries(models.Model):
 class Tutorial(models.Model):
     tutorial_title = models.CharField(max_length=200)
     tutorial_content = models.TextField()
-    tutorial_publish = models.DateTimeField("date published", default=timezone.now)
+    tutorial_publish = models.DateTimeField("date published", default=timezone.now())
 
     tutorial_series = models.ForeignKey(TutorialSeries,
                                         default=1,
@@ -42,3 +42,5 @@ class Tutorial(models.Model):
 
     def __str__(self):
         return self.tutorial_title
+
+

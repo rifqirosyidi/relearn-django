@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from .models import Tutorial
+from django.shortcuts import render, redirect, HttpResponse
+from .models import Tutorial, TutorialCategory, TutorialSeries
 from .forms import NewUserForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout, authenticate
@@ -7,10 +7,40 @@ from django.contrib import messages
 
 
 # Create your views here.
+
+def singe_slug(request, single_url):
+    categories = [c.category_slug for c in TutorialCategory.objects.all()]
+    if single_url in categories:
+        matching_series = TutorialSeries.objects.filter(tutorial_category__category_slug=single_url)
+
+        series_obj = {}
+        for m in matching_series.all():
+            part_one = Tutorial.objects.filter(tutorial_series__tutorial_series=m.tutorial_series).earliest('tutorial_publish')
+            series_obj[m] = part_one
+
+        context = {
+            'part_one': series_obj
+        }
+        return render(request, 'main/category.html', context)
+
+    tutorials = [t.tutorial_slug for t in Tutorial.objects.all()]
+    if single_url in tutorials:
+        this_tutorial = Tutorial.objects.get(tutorial_slug=single_url)
+        tutorials_from_series = Tutorial.objects.filter(tutorial_series__tutorial_series=this_tutorial.tutorial_series).order_by('tutorial_publish')
+        this_tutorial_idx = list(tutorials_from_series).index(this_tutorial)
+
+        context = {
+            'tutorial': this_tutorial,
+            'sidebar': tutorials_from_series,
+            'this_tut_idx': this_tutorial_idx
+        }
+        return render(request, 'main/tutorial.html', context)
+
+
 def homepage(request):
     return render(request=request,
-                  template_name='main/home.html',
-                  context={'tutorials': Tutorial.objects.all()})
+                  template_name='main/categories.html',
+                  context={'categories': TutorialCategory.objects.all()})
 
 
 def register(request):
@@ -61,4 +91,3 @@ def login_account(request):
         'form': form
     }
     return render(request, 'main/login.html', context)
-
